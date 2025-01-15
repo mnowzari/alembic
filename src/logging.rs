@@ -1,6 +1,6 @@
-use std::error::Error;
-use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
+use std::time::{Duration, SystemTime};
+use std::{error::Error, time::UNIX_EPOCH};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum EnvLogLevel {
@@ -13,7 +13,7 @@ pub enum EnvLogLevel {
 pub struct LogMessage {
     pub level: EnvLogLevel,
     pub log_message: String,
-    pub timestamp: SystemTime,
+    pub timestamp: String,
 }
 
 // LogHandler should establish several things:
@@ -33,21 +33,30 @@ impl LogHandler {
         })
     }
 
-    pub fn log(&self, log_level: EnvLogLevel, message: String) -> Result<LogMessage, Box<dyn Error>> {
+    pub fn log(
+        &self,
+        log_level: EnvLogLevel,
+        message: String,
+    ) -> Result<LogMessage, Box<dyn Error>> {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+            .to_string();
+
         // create and return log message object
         let new_log_message = LogMessage {
             level: log_level,
             log_message: message,
-            timestamp: SystemTime::now(),
+            timestamp,
         };
         Ok(new_log_message)
     }
 }
 
-
 #[cfg(test)]
 mod logging_tests {
-    use std::{env, ffi::OsString, fs};
+    // use std::{env, ffi::OsString, fs};
 
     use super::*;
 
@@ -55,13 +64,26 @@ mod logging_tests {
     fn test_log_message_creation_all_log_levels() {
         let log_handler: LogHandler = LogHandler::new(EnvLogLevel::INFO).unwrap();
 
-        let log_line_one = log_handler.log(EnvLogLevel::INFO, "This is an INFO log message".to_string())
+        let log_line_one = log_handler
+            .log(EnvLogLevel::INFO, "This is an INFO log message".to_string())
             .unwrap();
-        let log_line_two = log_handler.log(EnvLogLevel::DEBUG, "This is a DEBUG log message".to_string())
+
+        let log_line_two = log_handler
+            .log(
+                EnvLogLevel::DEBUG,
+                "This is a DEBUG log message".to_string(),
+            )
             .unwrap();
-        let log_line_three = log_handler.log(EnvLogLevel::WARN, "This is a WARN log message".to_string())
+
+        let log_line_three = log_handler
+            .log(EnvLogLevel::WARN, "This is a WARN log message".to_string())
             .unwrap();
-        let log_line_four = log_handler.log(EnvLogLevel::ERROR, "This is an ERROR log message".to_string())
+
+        let log_line_four = log_handler
+            .log(
+                EnvLogLevel::ERROR,
+                "This is an ERROR log message".to_string(),
+            )
             .unwrap();
 
         assert_eq!(log_line_one.level, EnvLogLevel::INFO);
@@ -69,10 +91,21 @@ mod logging_tests {
         assert_eq!(log_line_three.level, EnvLogLevel::WARN);
         assert_eq!(log_line_four.level, EnvLogLevel::ERROR);
 
-        assert_eq!("This is an INFO log message".to_string(), log_line_one.log_message);
-        assert_eq!("This is a DEBUG log message".to_string(), log_line_two.log_message);
-        assert_eq!("This is a WARN log message".to_string(), log_line_three.log_message);
-        assert_eq!("This is an ERROR log message".to_string(), log_line_four.log_message);
+        assert_eq!(
+            "This is an INFO log message".to_string(),
+            log_line_one.log_message
+        );
+        assert_eq!(
+            "This is a DEBUG log message".to_string(),
+            log_line_two.log_message
+        );
+        assert_eq!(
+            "This is a WARN log message".to_string(),
+            log_line_three.log_message
+        );
+        assert_eq!(
+            "This is an ERROR log message".to_string(),
+            log_line_four.log_message
+        );
     }
 }
-
