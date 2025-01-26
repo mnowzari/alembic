@@ -1,16 +1,9 @@
-mod logging;
+mod handler;
+mod message;
 
 fn main() {
     println!("Logpile development driver");
 
-    let logh: logging::LogHandler = logging::LogHandler::new(logging::EnvLogLevel::INFO).unwrap();
-    let logline = logh
-        .log(
-            logging::EnvLogLevel::INFO,
-            "This is a log message".to_string(),
-        )
-        .unwrap();
-
-    println!("{}", logline.log_message.to_string());
-    println!("{}", logline.timestamp);
+    let logger: handler::LogHandler = handler::LogHandler::new().unwrap();
+    logger.log(message::EnvLogLevel::Debug,"This is a log message");
 }
