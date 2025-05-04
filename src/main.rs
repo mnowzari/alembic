@@ -1,11 +1,12 @@
+#[allow(dead_code, unused)]
 mod handler;
 mod message;
 mod sinks;
 
-use std::error::Error;
 use crate::sinks::*;
+use std::error::Error;
 
-fn main() -> Result<(), Box<dyn Error>>{
+fn main() -> Result<(), Box<dyn Error>> {
     println!("Logpile development driver");
     let mut logger: handler::Handler = handler::Handler::new().unwrap();
 
@@ -14,10 +15,11 @@ fn main() -> Result<(), Box<dyn Error>>{
 
     logger.set_sinks(vec![new_stdout_sink, new_file_sink])?;
 
-    logger.debug(String::from("prior art"));
-    logger.info(String::from("Wow this is so cool OOP in Rust"));
-    logger.warn(String::from("WARNUNG WARNUNG"));
-    logger.error(String::from("! ERROR !"));
-    logger.fatal(String::from("FATALITY"));
+    logger.debug("prior art");
+    logger.debug("huh");
+    logger.info("Wow this is so cool OOP in Rust");
+    logger.warn("WARNUNG WARNUNG");
+    logger.error("! ERROR !");
+    logger.fatal("FATALITY");
     Ok(())
 }

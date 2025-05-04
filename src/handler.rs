@@ -1,5 +1,5 @@
-use std::error::Error;
 use crate::sinks::base::{LogLevels, LogMessage};
+use std::error::Error;
 
 pub struct Handler {
     sinks: Vec<Box<dyn LogMessage>>, // Box dyn that implements the LogMessage trait
@@ -14,29 +14,29 @@ impl Handler {
         Ok(self.sinks = sinks)
     }
 
-    fn log_to_sinks(&mut self, message: String, log_level: LogLevels) {
+    fn log_to_sinks(&mut self, message: &str, log_level: LogLevels) {
         for s in self.sinks.iter_mut() {
-            s.log_message(&message, &log_level);
+            s.log_message(&String::from(message), &log_level);
         }
     }
 
-    pub fn debug(&mut self, message: String) {
+    pub fn debug(&mut self, message: &str) {
         self.log_to_sinks(message, LogLevels::DEBUG);
     }
 
-    pub fn info(&mut self, message: String) {
+    pub fn info(&mut self, message: &str) {
         self.log_to_sinks(message, LogLevels::INFO);
     }
 
-    pub fn warn(&mut self, message: String) {
+    pub fn warn(&mut self, message: &str) {
         self.log_to_sinks(message, LogLevels::WARN);
     }
 
-    pub fn error(&mut self, message: String) {
+    pub fn error(&mut self, message: &str) {
         self.log_to_sinks(message, LogLevels::ERROR);
     }
 
-    pub fn fatal(&mut self, message: String) {
+    pub fn fatal(&mut self, message: &str) {
         self.log_to_sinks(message, LogLevels::FATAL);
     }
 }

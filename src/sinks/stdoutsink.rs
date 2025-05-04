@@ -1,5 +1,5 @@
-use std::error::Error;
 use super::base;
+use std::error::Error;
 
 pub struct StdoutSink {
     type_id: String,
