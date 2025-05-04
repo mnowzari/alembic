@@ -1,6 +1,5 @@
 #[allow(dead_code, unused)]
 mod handler;
-mod message;
 mod sinks;
 
 use crate::sinks::*;
