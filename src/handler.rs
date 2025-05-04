@@ -1,97 +1,42 @@
-use serde::{Deserialize, Serialize};
 use std::error::Error;
+use crate::sinks::base::{LogLevels, LogMessage};
 
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
-
-use crate::message::{self, LogMessage};
-
-// LogHandler should establish several things:
-// a. The log level
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LogHandler {
-    output_sink: String, // where to dump output
+pub struct Handler {
+    sinks: Vec<Box<dyn LogMessage>>, // Box dyn that implements the LogMessage trait
 }
 
-impl LogHandler {
-    pub fn new() -> Result<LogHandler, Box<dyn Error>> {
-        Ok(LogHandler {
-            output_sink: String::new(),
-        })
+impl Handler {
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        Ok(Handler { sinks: vec![] })
     }
 
-    pub fn log(
-        &self,
-        level: message::EnvLogLevel,
-        message: &str,
-    ) -> Result<LogMessage, Box<dyn Error>> {
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis()
-            .to_string();
+    pub fn set_sinks(&mut self, sinks: Vec<Box<dyn LogMessage>>) -> Result<(), Box<dyn Error>> {
+        Ok(self.sinks = sinks)
+    }
 
-        // create and return log message object
-        Ok(LogMessage {
-            level: message::EnvLogLevel::Debug,
-            log_message: message.to_string(),
-            timestamp,
-        })
+    fn log_to_sinks(&mut self, message: String, log_level: LogLevels) {
+        for s in self.sinks.iter_mut() {
+            s.log_message(&message, &log_level);
+        }
+    }
+
+    pub fn debug(&mut self, message: String) {
+        self.log_to_sinks(message, LogLevels::DEBUG);
+    }
+
+    pub fn info(&mut self, message: String) {
+        self.log_to_sinks(message, LogLevels::INFO);
+    }
+
+    pub fn warn(&mut self, message: String) {
+        self.log_to_sinks(message, LogLevels::WARN);
+    }
+
+    pub fn error(&mut self, message: String) {
+        self.log_to_sinks(message, LogLevels::ERROR);
+    }
+
+    pub fn fatal(&mut self, message: String) {
+        self.log_to_sinks(message, LogLevels::FATAL);
     }
 }
-
-// #[cfg(test)]
-// mod logging_tests {
-//     // use std::{env, ffi::OsString, fs};
-
-//     use super::*;
-
-//     #[test]
-//     fn test_log_message_creation_all_log_levels() {
-//         let log_handler: LogHandler = LogHandler::new(EnvLogLevel::Info).unwrap();
-
-//         let log_line_one = log_handler
-//             .log(EnvLogLevel::Info, "This is an Info log message".to_string())
-//             .unwrap();
-
-//         let log_line_two = log_handler
-//             .log(
-//                 EnvLogLevel::Debug,
-//                 "This is a Debug log message".to_string(),
-//             )
-//             .unwrap();
-
-//         let log_line_three = log_handler
-//             .log(EnvLogLevel::Warn, "This is a Warn log message".to_string())
-//             .unwrap();
-
-//         let log_line_four = log_handler
-//             .log(
-//                 EnvLogLevel::Error,
-//                 "This is an Error log message".to_string(),
-//             )
-//             .unwrap();
-
-//         assert_eq!(log_line_one.level, EnvLogLevel::Info);
-//         assert_eq!(log_line_two.level, EnvLogLevel::Debug);
-//         assert_eq!(log_line_three.level, EnvLogLevel::Warn);
-//         assert_eq!(log_line_four.level, EnvLogLevel::Error);
-
-//         assert_eq!(
-//             "This is an Info log message".to_string(),
-//             log_line_one.log_message
-//         );
-//         assert_eq!(
-//             "This is a Debug log message".to_string(),
-//             log_line_two.log_message
-//         );
-//         assert_eq!(
-//             "This is a Warn log message".to_string(),
-//             log_line_three.log_message
-//         );
-//         assert_eq!(
-//             "This is an Error log message".to_string(),
-//             log_line_four.log_message
-//         );
-//     }
-// }
