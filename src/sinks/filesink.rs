@@ -7,7 +7,10 @@ pub struct FileSink {
 
 impl base::LogMessage for FileSink {
     fn log_message(&mut self, message: &String, log_levels: &base::LogLevels) {
-        println!("[TIMESTAMP-HERE] [{}] [FILE] {}", log_levels, message);
+        println!(
+            "[TIMESTAMP-HERE] [{}] [{}] {}",
+            log_levels, self.type_id, message
+        );
     }
 }
 

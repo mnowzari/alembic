@@ -7,7 +7,10 @@ pub struct StdoutSink {
 
 impl base::LogMessage for StdoutSink {
     fn log_message(&mut self, message: &String, log_levels: &base::LogLevels) {
-        println!("[TIMESTAMP-HERE] [{}] [STDOUT] {}", log_levels, message);
+        println!(
+            "[TIMESTAMP-HERE] [{}] [{}] {}",
+            log_levels, self.type_id, message
+        );
     }
 }
 
