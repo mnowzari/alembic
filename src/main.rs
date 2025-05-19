@@ -3,16 +3,23 @@ mod handler;
 mod sinks;
 
 use crate::sinks::*;
-use std::error::Error;
+use std::{error::Error, path::PathBuf};
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Logpile development driver");
     let mut logger: handler::Handler = handler::Handler::new().unwrap();
 
-    let new_stdout_sink = Box::new(stdoutsink::StdoutSink::new().unwrap());
-    let new_file_sink = Box::new(filesink::FileSink::new().unwrap());
+    let new_stdout_sink = stdoutsink::StdoutSink::new().unwrap();
+    let mut new_file_sink = filesink::FileSink::new(
+        PathBuf::from("alembic.log"),
+        filesink::RotationPolicy::HOURLY
+    ).unwrap();
 
-    logger.set_sinks(vec![new_stdout_sink, new_file_sink])?;
+    new_file_sink.set_rotation_policy(filesink::RotationPolicy::HOURLY);
+
+    // logger.set_sinks(vec![new_stdout_sink, new_file_sink])?;
+    logger.add_sink(Box::new(new_stdout_sink));
+    logger.add_sink(Box::new(new_file_sink));
 
     logger.debug("prior art");
     logger.debug("huh");

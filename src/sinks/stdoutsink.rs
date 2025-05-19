@@ -1,3 +1,5 @@
+use chrono::Local;
+
 use super::base;
 use std::error::Error;
 
@@ -7,9 +9,11 @@ pub struct StdoutSink {
 
 impl base::LogMessage for StdoutSink {
     fn log_message(&mut self, message: &String, log_levels: &base::LogLevels) {
+        // generate timestamp
+        let timestamp: chrono::DateTime<Local> = Local::now();
         println!(
-            "[TIMESTAMP-HERE] [{}] [{}] {}",
-            log_levels, self.type_id, message
+            "[{:?}] [{}] [{}] {}",
+            timestamp, log_levels, self.type_id, message
         );
     }
 }

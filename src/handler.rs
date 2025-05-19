@@ -10,8 +10,12 @@ impl Handler {
         Ok(Handler { sinks: vec![] })
     }
 
-    pub fn set_sinks(&mut self, sinks: Vec<Box<dyn LogMessage>>) -> Result<(), Box<dyn Error>> {
-        Ok(self.sinks = sinks)
+    pub fn add_sink(&mut self, sink: Box<dyn LogMessage>) {
+        self.sinks.push(sink)
+    }
+
+    pub fn set_sinks(&mut self, sinks: Vec<Box<dyn LogMessage>>) {
+        self.sinks = sinks
     }
 
     fn log_to_sinks(&mut self, message: &str, log_level: LogLevels) {

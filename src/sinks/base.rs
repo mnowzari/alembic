@@ -19,6 +19,7 @@ impl fmt::Display for LogLevels {
     }
 }
 
+/// All sinks must implement the LogMessage trait.
 pub trait LogMessage {
     fn log_message(&mut self, message: &String, log_levels: &LogLevels);
 }
