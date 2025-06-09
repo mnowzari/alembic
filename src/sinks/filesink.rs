@@ -1,8 +1,8 @@
 use chrono::Local;
 
-use super::base;
+use super::base::{self, LogLevels};
 use core::fmt;
-use std::{error::Error, fs::{self, File}, path::PathBuf, time::{Duration, SystemTime}};
+use std::{error::Error, fs::{self, File}, io::Write, path::PathBuf, time::{Duration, SystemTime}};
 
 pub enum RotationPolicy {
     HOURLY,
@@ -35,9 +35,11 @@ impl base::LogMessage for FileSink {
         // TODO - timestamp should be generated once, not per-sink!
         let timestamp: chrono::DateTime<Local> = Local::now();
         // prepare log message
-        self.prepare_log_message(message);
+        let prepared_message: String = self.prepare_log_message(
+            message,
+            log_levels);
         // append log message to file
-        self.append_to_file();
+        self.append_to_file(&prepared_message);
     }
 }
 
@@ -54,18 +56,41 @@ impl FileSink {
         self.rotation_policy = new_policy;
     }
 
-    fn prepare_log_message(&mut self, message: &String) {
-
+    fn prepare_log_message(&mut self, message: &String, log_levels: &base::LogLevels) -> String {
+        let timestamp: chrono::DateTime<Local> = Local::now();
+        format!(
+            "[{:?}] [{}] [{}] {}\n",
+            timestamp, log_levels, self.type_id, message
+        )
     }
 
-    fn append_to_file(&mut self) {
-        // check if file exists
-        // if exists, append to it
+    fn append_to_file(&mut self, message: &String) {
+        self.create_if_nonexistent();
+
+        let mut openf = File::options()
+            .append(true)
+            .create(true)
+            .open(&self.filename).unwrap();
+
+        openf.write(message.as_bytes())
+            .expect("write failed");
+    }
+
+    fn create_if_nonexistent(&mut self) {
+        let does_logfile_exist = fs::exists(self.filename
+            .clone())
+            .unwrap();
+        if does_logfile_exist == false {
+            self.create_new_log_file().unwrap();
+        }
     }
 
     fn rotate_log_file(&mut self) {
         // check if file exists
-        let does_logfile_exist = fs::exists(self.filename.clone()).unwrap();
+        let does_logfile_exist = fs::exists(self.filename
+            .clone())
+            .unwrap();
+
         // if it exists, determine if its age is greater than the current rotation policy
         if does_logfile_exist == true {
 
@@ -104,8 +129,8 @@ impl FileSink {
             }
 
             if is_stale == true {
-                self.rename_existing_log_file();
-                self.create_new_log_file();
+                self.rename_existing_log_file().unwrap();
+                self.create_new_log_file().unwrap();
             }
 
         }
