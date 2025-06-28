@@ -107,7 +107,6 @@ impl FileSink {
             match self.rotation_policy {
                 RotationPolicy::HOURLY => {
                     if duration_since > Duration::from_secs(3600) {
-                        println!("HERE");
                         is_stale = true;
                     }
                 },
