@@ -35,7 +35,6 @@ impl base::LogMessage for FileSink {
         self.rotate_log_file();
         // generate timestamp
         // TODO - timestamp should be generated once, not per-sink!
-        let timestamp: chrono::DateTime<Local> = Local::now();
         // prepare log message
         let prepared_message: String = self.prepare_log_message(
             message,
@@ -67,8 +66,6 @@ impl FileSink {
     }
 
     fn append_to_file(&mut self, message: &String) {
-        self.create_if_nonexistent();
-
         let mut openf = File::options()
             .append(true)
             .create(true)
@@ -78,14 +75,14 @@ impl FileSink {
             .expect("write failed");
     }
 
-    fn create_if_nonexistent(&mut self) {
-        let does_logfile_exist = fs::exists(self.filename
-            .clone())
-            .unwrap();
-        if does_logfile_exist == false {
-            self.create_new_log_file().unwrap();
-        }
-    }
+    // fn create_if_nonexistent(&mut self) {
+    //     let does_logfile_exist = fs::exists(self.filename
+    //         .clone())
+    //         .unwrap();
+    //     if does_logfile_exist == false {
+    //         self.create_new_log_file().unwrap();
+    //     }
+    // }
 
     fn rotate_log_file(&mut self) {
         // check if file exists
@@ -100,8 +97,8 @@ impl FileSink {
                 self.filename.clone()
             ).unwrap();
             
-            let creation_date = file_metadata.created().unwrap();
-            let duration_since = SystemTime::duration_since(
+            let creation_date: SystemTime = file_metadata.created().unwrap();
+            let duration_since: Duration = SystemTime::duration_since(
                 &SystemTime::now(), 
                 creation_date).unwrap();
 
@@ -133,7 +130,6 @@ impl FileSink {
                 self.rename_existing_log_file().unwrap();
                 self.create_new_log_file().unwrap();
             }
-
         }
         else {
             self.create_new_log_file().unwrap();
@@ -145,9 +141,7 @@ impl FileSink {
     }
 
     fn rename_existing_log_file(&mut self) -> Result<(), Box<dyn Error>> {
-        // let timestamp: chrono::DateTime<Local> = Local::now();
-        let timestamp: String =  utils::generate_timestamp();
-        // modify to unix timestamp
+        let timestamp =  utils::generate_unix_timestamp();
         // TODO - more sophisticated string manipulation!
         let new_logfile_name = format!("alembic.{:?}.log", timestamp);
         let _ = fs::rename(

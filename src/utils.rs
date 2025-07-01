@@ -1,10 +1,9 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub fn generate_timestamp() -> String {
+pub fn generate_unix_timestamp() -> u64 {
     let epoch = SystemTime::now();
-    let timestamp: String = epoch.duration_since(UNIX_EPOCH)
+    let timestamp: u64 = epoch.duration_since(UNIX_EPOCH)
         .expect("We are time traveling")
-        .as_secs()
-        .to_string();
+        .as_secs();
     timestamp
 }
