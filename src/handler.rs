@@ -1,3 +1,5 @@
+use chrono::Local;
+
 use crate::sinks::base::{LogLevels, LogMessage};
 use std::error::Error;
 
@@ -19,8 +21,11 @@ impl Handler {
     }
 
     fn log_to_sinks(&mut self, message: &str, log_level: LogLevels) {
+        // Generate timestamp here so all sinks have the same timestamp
+        let timestamp: chrono::DateTime<Local> = Local::now();
+
         for s in self.sinks.iter_mut() {
-            s.log_message(&String::from(message), &log_level);
+            s.log_message(&String::from(message), timestamp, &log_level);
         }
     }
 

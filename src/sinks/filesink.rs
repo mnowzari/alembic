@@ -4,7 +4,13 @@ use crate::utils;
 
 use super::base::{self};
 use core::fmt;
-use std::{error::Error, fs::{self, File}, io::Write, path::PathBuf, time::{Duration, SystemTime}};
+use std::{
+    error::Error,
+    fs::{self, File},
+    io::Write,
+    path::PathBuf,
+    time::{Duration, SystemTime},
+};
 
 pub enum RotationPolicy {
     HOURLY,
@@ -26,19 +32,22 @@ impl fmt::Display for RotationPolicy {
 pub struct FileSink {
     type_id: String,
     filename: PathBuf,
-    rotation_policy: RotationPolicy
+    rotation_policy: RotationPolicy,
 }
 
 impl base::LogMessage for FileSink {
-    fn log_message(&mut self, message: &String, log_levels: &base::LogLevels) {
+    fn log_message(
+        &mut self,
+        message: &String,
+        timestamp: chrono::DateTime<Local>,
+        log_levels: &base::LogLevels,
+    ) {
         // Before doing anything else, let's check if logs require rotation
         self.rotate_log_file();
         // generate timestamp
         // TODO - timestamp should be generated once, not per-sink!
         // prepare log message
-        let prepared_message: String = self.prepare_log_message(
-            message,
-            log_levels);
+        let prepared_message: String = self.prepare_log_message(message, timestamp, log_levels);
         // append log message to file
         self.append_to_file(&prepared_message);
     }
@@ -57,8 +66,12 @@ impl FileSink {
         self.rotation_policy = new_policy;
     }
 
-    fn prepare_log_message(&mut self, message: &String, log_levels: &base::LogLevels) -> String {
-        let timestamp: chrono::DateTime<Local> = Local::now();
+    fn prepare_log_message(
+        &mut self,
+        message: &String,
+        timestamp: chrono::DateTime<Local>,
+        log_levels: &base::LogLevels,
+    ) -> String {
         format!(
             "[{:?}] [{}] [{}] {}\n",
             timestamp, log_levels, self.type_id, message
@@ -86,9 +99,7 @@ impl FileSink {
 
     fn rotate_log_file(&mut self) {
         // check if file exists
-        let does_logfile_exist = fs::exists(self.filename
-            .clone())
-            .unwrap();
+        let does_logfile_exist = fs::exists(self.filename.clone()).unwrap();
 
         // if it exists, determine if its age is greater than the current rotation policy
         if does_logfile_exist == true {
@@ -108,22 +119,22 @@ impl FileSink {
                     if duration_since > Duration::from_secs(3600) {
                         is_stale = true;
                     }
-                },
+                }
                 RotationPolicy::DAILY => {
                     if duration_since > Duration::from_secs(86400) {
                         is_stale = true;
                     }
-                },
+                }
                 RotationPolicy::WEEKLY => {
                     if duration_since > Duration::from_secs(604800) {
                         is_stale = true;
                     }
-                },
+                }
                 RotationPolicy::MONTHLY => {
                     if duration_since > Duration::from_secs(2419200) {
                         is_stale = true;
                     }
-                },
+                }
             }
 
             if is_stale == true {

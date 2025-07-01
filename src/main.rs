@@ -13,8 +13,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let new_stdout_sink = stdoutsink::StdoutSink::new().unwrap();
     let mut new_file_sink = filesink::FileSink::new(
         PathBuf::from("/home/mattnowzari/Documents/rust_projects/alembic/alembic.log"),
-        filesink::RotationPolicy::WEEKLY
-    ).unwrap();
+        filesink::RotationPolicy::WEEKLY,
+    )
+    .unwrap();
 
     new_file_sink.set_rotation_policy(filesink::RotationPolicy::HOURLY);
 
