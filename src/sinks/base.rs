@@ -25,7 +25,7 @@ impl fmt::Display for LogLevels {
 pub trait LogMessage {
     fn log_message(
         &mut self,
-        message: &String,
+        message: &str,
         timestamp: chrono::DateTime<Local>,
         log_levels: &LogLevels,
     );

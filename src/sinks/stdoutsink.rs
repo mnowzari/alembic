@@ -10,7 +10,7 @@ pub struct StdoutSink {
 impl base::LogMessage for StdoutSink {
     fn log_message(
         &mut self,
-        message: &String,
+        message: &str,
         timestamp: chrono::DateTime<Local>,
         log_levels: &base::LogLevels,
     ) {

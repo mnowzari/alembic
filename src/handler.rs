@@ -1,6 +1,9 @@
 use chrono::Local;
 
-use crate::sinks::base::{LogLevels, LogMessage};
+use crate::{
+    sinks::base::{LogLevels, LogMessage},
+    utils::{self, generate_human_timestamp},
+};
 use std::error::Error;
 
 pub struct Handler {
@@ -13,16 +16,18 @@ impl Handler {
     }
 
     pub fn add_sink(&mut self, sink: Box<dyn LogMessage>) {
+        // Adds individual sinks to the handler
         self.sinks.push(sink)
     }
 
     pub fn set_sinks(&mut self, sinks: Vec<Box<dyn LogMessage>>) {
+        // Replaces the handler's entire vector with the incoming vector
         self.sinks = sinks
     }
 
     fn log_to_sinks(&mut self, message: &str, log_level: LogLevels) {
         // Generate timestamp here so all sinks have the same timestamp
-        let timestamp: chrono::DateTime<Local> = Local::now();
+        let timestamp: chrono::DateTime<Local> = utils::generate_human_timestamp();
 
         for s in self.sinks.iter_mut() {
             s.log_message(&String::from(message), timestamp, &log_level);
