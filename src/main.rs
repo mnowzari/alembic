@@ -1,6 +1,7 @@
 #[allow(dead_code, unused)]
 mod handler;
 mod sinks;
+mod utils;
 
 use crate::sinks::*;
 use std::{error::Error, path::PathBuf};

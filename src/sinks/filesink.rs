@@ -1,6 +1,8 @@
 use chrono::Local;
 
-use super::base::{self, LogLevels};
+use crate::utils;
+
+use super::base::{self};
 use core::fmt;
 use std::{error::Error, fs::{self, File}, io::Write, path::PathBuf, time::{Duration, SystemTime}};
 
@@ -143,7 +145,8 @@ impl FileSink {
     }
 
     fn rename_existing_log_file(&mut self) -> Result<(), Box<dyn Error>> {
-        let timestamp: chrono::DateTime<Local> = Local::now();
+        // let timestamp: chrono::DateTime<Local> = Local::now();
+        let timestamp: String =  utils::generate_timestamp();
         // modify to unix timestamp
         // TODO - more sophisticated string manipulation!
         let new_logfile_name = format!("alembic.{:?}.log", timestamp);
