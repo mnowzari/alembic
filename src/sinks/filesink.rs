@@ -1,6 +1,6 @@
-use chrono::Local;
-use crate::utils;
 use super::base::{self};
+use crate::utils;
+use chrono::Local;
 use core::fmt;
 use std::{
     error::Error,
@@ -9,6 +9,12 @@ use std::{
     path::PathBuf,
     time::{Duration, SystemTime},
 };
+
+// Constants for file rotation policies
+const HOURLY: u64 = 3600;
+const DAILY: u64 = 86400;
+const WEEKLY: u64 = 604800;
+const MONTHLY: u64 = 2419200;
 
 #[allow(dead_code)]
 pub enum RotationPolicy {
@@ -100,22 +106,22 @@ impl FileSink {
             let mut is_stale = false;
             match self.rotation_policy {
                 RotationPolicy::Hourly => {
-                    if duration_since > Duration::from_secs(3600) {
+                    if duration_since > Duration::from_secs(HOURLY) {
                         is_stale = true;
                     }
                 }
                 RotationPolicy::Daily => {
-                    if duration_since > Duration::from_secs(86400) {
+                    if duration_since > Duration::from_secs(DAILY) {
                         is_stale = true;
                     }
                 }
                 RotationPolicy::Weekly => {
-                    if duration_since > Duration::from_secs(604800) {
+                    if duration_since > Duration::from_secs(WEEKLY) {
                         is_stale = true;
                     }
                 }
                 RotationPolicy::Monthly => {
-                    if duration_since > Duration::from_secs(2419200) {
+                    if duration_since > Duration::from_secs(MONTHLY) {
                         is_stale = true;
                     }
                 }

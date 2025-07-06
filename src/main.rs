@@ -23,11 +23,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     logger.add_sink(Box::new(new_stdout_sink));
     logger.add_sink(Box::new(new_file_sink));
 
-    logger.debug("prior art");
-    logger.debug("huh");
-    logger.info("Wow this is so cool OOP in Rust");
-    logger.warn("WARNUNG WARNUNG");
+    logger.debug("println debugging is best debugging");
+    logger.info("Very informational");
+    logger.warn("WARNUNG");
     logger.error("! ERROR !");
-    logger.fatal("FATALITY");
+    logger.fatal("FATALITY.");
     Ok(())
 }

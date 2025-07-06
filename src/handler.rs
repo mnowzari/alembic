@@ -35,22 +35,22 @@ impl Handler {
     }
 
     pub fn debug(&mut self, message: &str) {
-        self.log_to_sinks(message, LogLevels::DEBUG);
+        self.log_to_sinks(message, LogLevels::Debug);
     }
 
     pub fn info(&mut self, message: &str) {
-        self.log_to_sinks(message, LogLevels::INFO);
+        self.log_to_sinks(message, LogLevels::Info);
     }
 
     pub fn warn(&mut self, message: &str) {
-        self.log_to_sinks(message, LogLevels::WARN);
+        self.log_to_sinks(message, LogLevels::Warn);
     }
 
     pub fn error(&mut self, message: &str) {
-        self.log_to_sinks(message, LogLevels::ERROR);
+        self.log_to_sinks(message, LogLevels::Error);
     }
 
     pub fn fatal(&mut self, message: &str) {
-        self.log_to_sinks(message, LogLevels::FATAL);
+        self.log_to_sinks(message, LogLevels::Fatal);
     }
 }

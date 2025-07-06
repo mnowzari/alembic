@@ -3,20 +3,20 @@ use core::fmt;
 use chrono::Local;
 
 pub enum LogLevels {
-    DEBUG,
-    INFO,
-    WARN,
-    ERROR,
-    FATAL,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Fatal,
 }
 impl fmt::Display for LogLevels {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            LogLevels::DEBUG => write!(f, "DEBUG"),
-            LogLevels::INFO => write!(f, "INFO"),
-            LogLevels::WARN => write!(f, "WARN"),
-            LogLevels::ERROR => write!(f, "ERROR"),
-            LogLevels::FATAL => write!(f, "FATAL"),
+            LogLevels::Debug => write!(f, "DEBUG"),
+            LogLevels::Info => write!(f, "INFO"),
+            LogLevels::Warn => write!(f, "WARN"),
+            LogLevels::Error => write!(f, "ERROR"),
+            LogLevels::Fatal => write!(f, "FATAL"),
         }
     }
 }
