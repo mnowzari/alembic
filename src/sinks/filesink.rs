@@ -1,22 +1,35 @@
+use super::base::{self};
+use crate::utils;
 use chrono::Local;
-
-use super::base::{self, LogLevels};
 use core::fmt;
-use std::{error::Error, fs::{self, File}, io::Write, path::PathBuf, time::{Duration, SystemTime}};
+use std::{
+    error::Error,
+    fs::{self, File},
+    io::Write,
+    path::PathBuf,
+    time::{Duration, SystemTime},
+};
 
+// Constants for file rotation policies
+const HOURLY: u64 = 3600;
+const DAILY: u64 = 86400;
+const WEEKLY: u64 = 604800;
+const MONTHLY: u64 = 2419200;
+
+#[allow(dead_code)]
 pub enum RotationPolicy {
-    HOURLY,
-    DAILY,
-    WEEKLY,
-    MONTHLY,
+    Hourly,
+    Daily,
+    Weekly,
+    Monthly,
 }
 impl fmt::Display for RotationPolicy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            RotationPolicy::HOURLY => write!(f, "HOURLY"),
-            RotationPolicy::DAILY => write!(f, "DAILY"),
-            RotationPolicy::WEEKLY => write!(f, "WEEKLy"),
-            RotationPolicy::MONTHLY => write!(f, "MONTHly"),
+            RotationPolicy::Hourly => write!(f, "Hourly"),
+            RotationPolicy::Daily => write!(f, "Daily"),
+            RotationPolicy::Weekly => write!(f, "Weekly"),
+            RotationPolicy::Monthly => write!(f, "Monthly"),
         }
     }
 }
@@ -24,20 +37,20 @@ impl fmt::Display for RotationPolicy {
 pub struct FileSink {
     type_id: String,
     filename: PathBuf,
-    rotation_policy: RotationPolicy
+    rotation_policy: RotationPolicy,
 }
 
 impl base::LogMessage for FileSink {
-    fn log_message(&mut self, message: &String, log_levels: &base::LogLevels) {
+    fn log_message(
+        &mut self,
+        message: &str,
+        timestamp: chrono::DateTime<Local>,
+        log_levels: &base::LogLevels,
+    ) {
         // Before doing anything else, let's check if logs require rotation
         self.rotate_log_file();
-        // generate timestamp
-        // TODO - timestamp should be generated once, not per-sink!
-        let timestamp: chrono::DateTime<Local> = Local::now();
         // prepare log message
-        let prepared_message: String = self.prepare_log_message(
-            message,
-            log_levels);
+        let prepared_message: String = self.prepare_log_message(message, timestamp, log_levels);
         // append log message to file
         self.append_to_file(&prepared_message);
     }
@@ -56,8 +69,12 @@ impl FileSink {
         self.rotation_policy = new_policy;
     }
 
-    fn prepare_log_message(&mut self, message: &String, log_levels: &base::LogLevels) -> String {
-        let timestamp: chrono::DateTime<Local> = Local::now();
+    fn prepare_log_message(
+        &mut self,
+        message: &str,
+        timestamp: chrono::DateTime<Local>,
+        log_levels: &base::LogLevels,
+    ) -> String {
         format!(
             "[{:?}] [{}] [{}] {}\n",
             timestamp, log_levels, self.type_id, message
@@ -65,75 +82,56 @@ impl FileSink {
     }
 
     fn append_to_file(&mut self, message: &String) {
-        self.create_if_nonexistent();
-
         let mut openf = File::options()
             .append(true)
             .create(true)
-            .open(&self.filename).unwrap();
-
-        openf.write(message.as_bytes())
-            .expect("write failed");
-    }
-
-    fn create_if_nonexistent(&mut self) {
-        let does_logfile_exist = fs::exists(self.filename
-            .clone())
+            .open(&self.filename)
             .unwrap();
-        if does_logfile_exist == false {
-            self.create_new_log_file().unwrap();
-        }
+
+        openf.write_all(message.as_bytes()).expect("write failed");
     }
 
     fn rotate_log_file(&mut self) {
         // check if file exists
-        let does_logfile_exist = fs::exists(self.filename
-            .clone())
-            .unwrap();
+        let does_logfile_exist = fs::exists(self.filename.clone()).unwrap();
 
         // if it exists, determine if its age is greater than the current rotation policy
-        if does_logfile_exist == true {
+        if does_logfile_exist {
+            let file_metadata = fs::metadata(self.filename.clone()).unwrap();
 
-            let file_metadata = fs::metadata(
-                self.filename.clone()
-            ).unwrap();
-            
-            let creation_date = file_metadata.created().unwrap();
-            let duration_since = SystemTime::duration_since(
-                &SystemTime::now(), 
-                creation_date).unwrap();
+            let creation_date: SystemTime = file_metadata.created().unwrap();
+            let duration_since: Duration =
+                SystemTime::duration_since(&SystemTime::now(), creation_date).unwrap();
 
             let mut is_stale = false;
             match self.rotation_policy {
-                RotationPolicy::HOURLY => {
-                    if duration_since > Duration::from_secs(3600) {
+                RotationPolicy::Hourly => {
+                    if duration_since > Duration::from_secs(HOURLY) {
                         is_stale = true;
                     }
-                },
-                RotationPolicy::DAILY => {
-                    if duration_since > Duration::from_secs(86400) {
+                }
+                RotationPolicy::Daily => {
+                    if duration_since > Duration::from_secs(DAILY) {
                         is_stale = true;
                     }
-                },
-                RotationPolicy::WEEKLY => {
-                    if duration_since > Duration::from_secs(604800) {
+                }
+                RotationPolicy::Weekly => {
+                    if duration_since > Duration::from_secs(WEEKLY) {
                         is_stale = true;
                     }
-                },
-                RotationPolicy::MONTHLY => {
-                    if duration_since > Duration::from_secs(2419200) {
+                }
+                RotationPolicy::Monthly => {
+                    if duration_since > Duration::from_secs(MONTHLY) {
                         is_stale = true;
                     }
-                },
+                }
             }
 
-            if is_stale == true {
+            if is_stale {
                 self.rename_existing_log_file().unwrap();
                 self.create_new_log_file().unwrap();
             }
-
-        }
-        else {
+        } else {
             self.create_new_log_file().unwrap();
         }
     }
@@ -143,13 +141,10 @@ impl FileSink {
     }
 
     fn rename_existing_log_file(&mut self) -> Result<(), Box<dyn Error>> {
-        let timestamp: chrono::DateTime<Local> = Local::now();
-        // modify to unix timestamp
+        let timestamp = utils::generate_unix_timestamp();
         // TODO - more sophisticated string manipulation!
         let new_logfile_name = format!("alembic.{:?}.log", timestamp);
-        let _ = fs::rename(
-            self.filename.clone(),
-            PathBuf::from(new_logfile_name));
+        let _ = fs::rename(self.filename.clone(), PathBuf::from(new_logfile_name));
 
         Ok(())
     }
