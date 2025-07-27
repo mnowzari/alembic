@@ -1,13 +1,9 @@
-#[allow(dead_code, unused)]
-mod handler;
-mod sinks;
-mod utils;
+use std::path::PathBuf;
 
-use crate::sinks::*;
-use std::{error::Error, path::PathBuf};
+use alembic::{sinks::{filesink, stdoutsink}, *};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    println!("Logpile development driver");
+#[test]
+fn filesink_test() {
     let mut logger: handler::Handler = handler::Handler::new().unwrap();
 
     let new_stdout_sink = stdoutsink::StdoutSink::new().unwrap();
@@ -28,5 +24,4 @@ fn main() -> Result<(), Box<dyn Error>> {
     logger.warn("WARNUNG");
     logger.error("! ERROR !");
     logger.fatal("FATALITY.");
-    Ok(())
 }

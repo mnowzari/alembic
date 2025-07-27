@@ -12,6 +12,21 @@ pub fn generate_unix_timestamp() -> u64 {
 }
 
 pub fn generate_human_timestamp() -> chrono::DateTime<Local> {
-    let timestamp: chrono::DateTime<Local> = Local::now();
-    timestamp
+    Local::now()
 }
+
+// #[cfg(test)]
+// mod utils_tests {
+//     use super::*;
+
+//     #[test]
+//     fn generate_human_timestamp_test() {
+//         let timestamp: chrono::DateTime<chrono::Local> = generate_human_timestamp();
+//     }
+
+//     #[test]
+//     fn generate_unix_timestamp() {
+//         let timestamp = generate_unix_timestamp();
+
+//     }
+// }
