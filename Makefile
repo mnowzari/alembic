@@ -11,11 +11,13 @@ clean-build:
 	cargo clean
 	cargo build
 
-autocorrect:
+autoformat:
 	rustfmt src/lib.rs --style-edition 2024
+	rustfmt tests/integrations.rs --style-edition 2024
 
 lint:
 	rustfmt src/lib.rs --style-edition 2024 --check
+	rustfmt tests/integrations.rs --style-edition 2024
 
 clippy:
 	cargo clippy

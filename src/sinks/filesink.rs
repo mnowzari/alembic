@@ -35,9 +35,9 @@ impl fmt::Display for RotationPolicy {
 }
 
 pub struct FileSink {
-    type_id: String,
-    filename: PathBuf,
-    rotation_policy: RotationPolicy,
+    pub type_id: String,
+    pub filename: PathBuf,
+    pub rotation_policy: RotationPolicy,
 }
 
 impl base::LogMessage for FileSink {
