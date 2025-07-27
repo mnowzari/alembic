@@ -5,7 +5,7 @@ use alembic::{
     sinks::{
         filesink::{self, FileSink, RotationPolicy},
         stderr::StderrSink,
-        stdoutsink::{StdoutSink},
+        stdoutsink::StdoutSink,
     },
 };
 

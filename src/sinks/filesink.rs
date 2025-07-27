@@ -144,8 +144,8 @@ impl FileSink {
 
     fn rename_existing_log_file(&mut self) -> Result<(), Box<dyn Error>> {
         let timestamp: u64 = utils::generate_unix_timestamp();
-        // TODO - change the following line to use the actual file name
-        let new_logfile_name: String = format!("alembic.{:?}.log", timestamp);
+        let file_stem: PathBuf = PathBuf::from(self.filename.file_stem().unwrap());
+        let new_logfile_name: String = format!("{}.{}.log", file_stem.to_string_lossy(), timestamp);
         let _ = fs::rename(self.filename.clone(), PathBuf::from(new_logfile_name));
         Ok(())
     }
