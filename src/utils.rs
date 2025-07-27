@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use chrono::Local;
 
 pub fn generate_unix_timestamp() -> u64 {
-    let epoch = SystemTime::now();
+    let epoch: SystemTime = SystemTime::now();
     let timestamp: u64 = epoch
         .duration_since(UNIX_EPOCH)
         .expect("We are time traveling?")
@@ -12,6 +12,5 @@ pub fn generate_unix_timestamp() -> u64 {
 }
 
 pub fn generate_human_timestamp() -> chrono::DateTime<Local> {
-    let timestamp: chrono::DateTime<Local> = Local::now();
-    timestamp
+    Local::now()
 }

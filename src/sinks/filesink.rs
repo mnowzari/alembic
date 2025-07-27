@@ -35,9 +35,9 @@ impl fmt::Display for RotationPolicy {
 }
 
 pub struct FileSink {
-    type_id: String,
-    filename: PathBuf,
-    rotation_policy: RotationPolicy,
+    pub type_id: String,
+    pub filename: PathBuf,
+    pub rotation_policy: RotationPolicy,
 }
 
 impl base::LogMessage for FileSink {
@@ -47,7 +47,7 @@ impl base::LogMessage for FileSink {
         timestamp: chrono::DateTime<Local>,
         log_levels: &base::LogLevels,
     ) {
-        // Before doing anything else, let's check if logs require rotation
+        // Before doing anything else, check if logs require rotation
         self.rotate_log_file();
         // prepare log message
         let prepared_message: String = self.prepare_log_message(message, timestamp, log_levels);
@@ -128,8 +128,10 @@ impl FileSink {
             }
 
             if is_stale {
-                self.rename_existing_log_file().unwrap();
-                self.create_new_log_file().unwrap();
+                self.rename_existing_log_file()
+                    .expect("Error rotating log files, cannot rename!");
+                self.create_new_log_file()
+                    .expect("Error creating a new log file during rotation!");
             }
         } else {
             self.create_new_log_file().unwrap();
@@ -141,11 +143,10 @@ impl FileSink {
     }
 
     fn rename_existing_log_file(&mut self) -> Result<(), Box<dyn Error>> {
-        let timestamp = utils::generate_unix_timestamp();
-        // TODO - more sophisticated string manipulation!
-        let new_logfile_name = format!("alembic.{:?}.log", timestamp);
+        let timestamp: u64 = utils::generate_unix_timestamp();
+        let file_stem: PathBuf = PathBuf::from(self.filename.file_stem().unwrap());
+        let new_logfile_name: String = format!("{}.{}.log", file_stem.to_string_lossy(), timestamp);
         let _ = fs::rename(self.filename.clone(), PathBuf::from(new_logfile_name));
-
         Ok(())
     }
 }

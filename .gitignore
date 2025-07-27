@@ -2,3 +2,5 @@
 .idea
 .todo
 *.log
+.vscode
+.github

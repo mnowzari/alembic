@@ -2,7 +2,7 @@ use chrono::Local;
 
 use crate::{
     sinks::base::{LogLevels, LogMessage},
-    utils::{self, generate_human_timestamp},
+    utils::{self},
 };
 use std::error::Error;
 
