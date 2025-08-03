@@ -21,13 +21,19 @@ fn log_sender(logger: &mut Handler) -> Result<bool, Box<dyn Error>> {
     Ok(true)
 }
 
+fn validate_log_lines() -> Result<bool, bool> {
+    let log_contents: Vec<u8> = fs::read(FILESINK_FIXTURE).unwrap();
+    match log_contents.len() == 354 {
+        // length of the byte vector
+        true => Ok(true),
+        false => Err(false),
+    }
+}
+
 fn check_if_logfile_exists() -> Result<bool, bool> {
     let does_logfile_exist: bool = fs::exists(FILESINK_FIXTURE).unwrap();
     match does_logfile_exist {
-        true => {
-            let _ = fs::remove_file(FILESINK_FIXTURE);
-            Ok(true)
-        }
+        true => Ok(true),
         false => Err(false),
     }
 }
@@ -69,4 +75,7 @@ fn filesink_test() {
 
     assert_eq!(log_sender(&mut logger).unwrap(), true);
     assert_eq!(check_if_logfile_exists().unwrap(), true);
+    assert_eq!(validate_log_lines().unwrap(), true);
+
+    let _ = fs::remove_file(FILESINK_FIXTURE); // delete fixture
 }
