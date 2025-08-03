@@ -24,7 +24,7 @@ impl base::LogMessage for StderrSink {
 impl StderrSink {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         Ok(StderrSink {
-            type_id: String::from("stdout"),
+            type_id: String::from("stderr"),
         })
     }
 }

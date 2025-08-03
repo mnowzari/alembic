@@ -17,7 +17,7 @@ autoformat:
 
 lint:
 	rustfmt src/lib.rs --style-edition 2024 --check
-	rustfmt tests/integrations.rs --style-edition 2024
+	rustfmt tests/integrations.rs --style-edition 2024 --check
 
 clippy:
 	cargo clippy
@@ -25,6 +25,3 @@ clippy:
 build-release:
 	cargo clean
 	cargo build --release
-
-run-driver:
-	./target/debug/alembic
