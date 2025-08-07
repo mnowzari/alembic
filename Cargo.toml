@@ -4,7 +4,7 @@ version = "0.1.2"
 edition = "2021"
 repository = "https://github.com/mnowzari/alembic"
 homepage = "https://github.com/mnowzari/alembic"
-readme = "https://github.com/mnowzari/alembic/blob/main/README.md"
+readme = "./README.md"
 description = "A Rust crate that lets you log once, send anywhere."
 
 [dependencies]
