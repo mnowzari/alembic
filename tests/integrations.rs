@@ -1,6 +1,6 @@
 use std::{error::Error, fs, path::PathBuf};
 
-use alembic::{
+use alembic_log::{
     handler::Handler,
     sinks::{
         filesink::{self, FileSink, RotationPolicy},
