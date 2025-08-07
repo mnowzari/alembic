@@ -6,7 +6,7 @@ repository = "https://github.com/mnowzari/alembic"
 homepage = "https://github.com/mnowzari/alembic"
 readme = "./README.md"
 description = "A Rust crate that lets you log once, send anywhere."
-license = "./LICENSE"
+license = "Apache-2.0"
 
 [dependencies]
 chrono = "0.4.41"
