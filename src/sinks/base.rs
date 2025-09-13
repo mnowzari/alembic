@@ -2,6 +2,7 @@ use core::fmt;
 
 use chrono::Local;
 
+#[derive(Eq, PartialEq, Hash)]
 pub enum LogLevels {
     Debug,
     Info,
@@ -21,7 +22,7 @@ impl fmt::Display for LogLevels {
     }
 }
 
-/// All sinks must implement the LogMessage trait.
+// All sinks must implement the LogMessage trait.
 pub trait LogMessage {
     fn log_message(
         &mut self,

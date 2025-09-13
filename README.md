@@ -13,21 +13,23 @@ Currently supported output sinks:
 
 To-do
 - Elasticsearch sink
-- Adjustable log formats
 
 ## Example: Write to a `stdout` and `File` sink simultaneously
 ```rust
-// Create a log handler
+// Create a log handler. Default log level is Error.
 let mut logger: Handler = Handler::new().unwrap();
+
 // Create stdout and file sink instances
 let mut stdout_sink: StdoutSink = Stdout::new().unwrap();
 let mut file_sink: FileSink = FileSink::new(
   PathBuf::from("./my_application.log"),
   alembic::filesink::RotationPolicy::Weekly
 ).unwrap();
+
 // Add the sinks to the log handler
 logger.add_sink(Box::new(stdout_sink));
 logger.add_sink(Box::new(file_sink));
+
 // Write some logs!
 logger.info("Hello, Alembic!")
 logger.error("Oh dear, there's been a terrible error.")
@@ -54,7 +56,7 @@ cargo build
 However, we also have a `Makefile` to make common development actions easier.
 
 ```shell
-make build # development build
+make build         # development build
 make build-release # release build
 ```
 
