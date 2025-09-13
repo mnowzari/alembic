@@ -3,9 +3,7 @@ use std::{error::Error, fs, path::PathBuf};
 use alembic_log::{
     handler::Handler,
     sinks::{
-        filesink::{self, FileSink, RotationPolicy},
-        stderr::StderrSink,
-        stdoutsink::StdoutSink,
+        base::LogLevels, filesink::{self, FileSink, RotationPolicy}, stderr::StderrSink, stdoutsink::StdoutSink
     },
 };
 
@@ -23,8 +21,8 @@ fn log_sender(logger: &mut Handler) -> Result<bool, Box<dyn Error>> {
 
 fn validate_log_lines() -> Result<bool, bool> {
     let log_contents: Vec<u8> = fs::read(FILESINK_FIXTURE).unwrap();
-    match log_contents.len() == 354 {
-        // length of the byte vector
+    // Naive way of checking the contents wrote correctly, accounts for Windows and Linux EoF behavior
+    match log_contents.len() >= 256 && log_contents.len() <= 260 {
         true => Ok(true),
         false => Err(false),
     }
@@ -61,6 +59,7 @@ fn stderr_sink_test() {
 #[test]
 fn filesink_test() {
     let mut logger: Handler = Handler::new().unwrap();
+    logger.set_log_level(LogLevels::Info);
 
     let mut new_file_sink: FileSink = FileSink::new(
         PathBuf::from("./alembic_test_fixture.log"),
